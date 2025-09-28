@@ -8,6 +8,7 @@ import EnrollmentPage from './pages/EnrollmentPage'
 import CoursesPage from './pages/CoursesPage'
 import PaymentsPage from './pages/PaymentsPage'
 import CashPage from './pages/CashPage'
+import PurchasesPage from './pages/PurchasesPage'
 import ReportsPage from './pages/ReportsPage'
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
               <Route path="/courses" element={<CoursesPage />} />
               <Route path="/payments" element={<PaymentsPage />} />
               <Route path="/cash" element={<CashPage />} />
+              <Route path="/purchases" element={<PurchasesPage />} />
               <Route path="/reports" element={<ReportsPage />} />
             </Routes>
           </PageWrapper>

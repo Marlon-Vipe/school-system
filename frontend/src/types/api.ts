@@ -371,3 +371,106 @@ export interface HealthCheck {
   environment: string;
 }
 
+// Purchase Types
+export interface Purchase {
+  id: string;
+  title: string;
+  description: string;
+  category: 'office_supplies' | 'educational_materials' | 'technology' | 
+           'maintenance' | 'cleaning_supplies' | 'food_services' | 
+           'transportation' | 'other';
+  amount: number;
+  supplier?: string;
+  invoiceNumber?: string;
+  paymentMethod: 'cash' | 'bank_transfer' | 'check' | 'credit_card' | 'other';
+  status: 'pending' | 'approved' | 'rejected' | 'completed' | 'cancelled';
+  purchaseDate: string;
+  expectedDeliveryDate?: string;
+  actualDeliveryDate?: string;
+  notes?: string;
+  rejectionReason?: string;
+  attachments?: string;
+  requestedBy: string;
+  approvedBy?: string;
+  requester?: User;
+  approver?: User;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreatePurchaseRequest {
+  title: string;
+  description: string;
+  category: 'office_supplies' | 'educational_materials' | 'technology' | 
+           'maintenance' | 'cleaning_supplies' | 'food_services' | 
+           'transportation' | 'other';
+  amount: number;
+  supplier?: string;
+  invoiceNumber?: string;
+  paymentMethod: 'cash' | 'bank_transfer' | 'check' | 'credit_card' | 'other';
+  purchaseDate: string;
+  expectedDeliveryDate?: string;
+  notes?: string;
+  requestedBy: string;
+}
+
+export interface UpdatePurchaseRequest {
+  title?: string;
+  description?: string;
+  category?: 'office_supplies' | 'educational_materials' | 'technology' | 
+            'maintenance' | 'cleaning_supplies' | 'food_services' | 
+            'transportation' | 'other';
+  amount?: number;
+  supplier?: string;
+  invoiceNumber?: string;
+  paymentMethod?: 'cash' | 'bank_transfer' | 'check' | 'credit_card' | 'other';
+  purchaseDate?: string;
+  expectedDeliveryDate?: string;
+  actualDeliveryDate?: string;
+  notes?: string;
+  status?: 'pending' | 'approved' | 'rejected' | 'completed' | 'cancelled';
+  rejectionReason?: string;
+  attachments?: string;
+}
+
+export interface PurchaseFilters {
+  status?: 'pending' | 'approved' | 'rejected' | 'completed' | 'cancelled';
+  category?: 'office_supplies' | 'educational_materials' | 'technology' | 
+            'maintenance' | 'cleaning_supplies' | 'food_services' | 
+            'transportation' | 'other';
+  requestedBy?: string;
+  startDate?: string;
+  endDate?: string;
+  search?: string;
+}
+
+export interface PurchaseQueryParams {
+  page?: number;
+  limit?: number;
+  sortBy?: 'createdAt' | 'purchaseDate' | 'amount' | 'title';
+  sortOrder?: 'ASC' | 'DESC';
+  status?: 'pending' | 'approved' | 'rejected' | 'completed' | 'cancelled';
+  category?: 'office_supplies' | 'educational_materials' | 'technology' | 
+            'maintenance' | 'cleaning_supplies' | 'food_services' | 
+            'transportation' | 'other';
+  requestedBy?: string;
+  startDate?: string;
+  endDate?: string;
+  search?: string;
+}
+
+export interface PurchaseStats {
+  totalPurchases: number;
+  totalAmount: number;
+  pendingPurchases: number;
+  approvedPurchases: number;
+  completedPurchases: number;
+  rejectedPurchases: number;
+  averageAmount: number;
+}
+
+export interface PurchaseResponse {
+  data: Purchase[];
+  pagination: Pagination;
+}
+

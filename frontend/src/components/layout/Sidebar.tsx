@@ -71,20 +71,7 @@ const menuItems: MenuItem[] = [
     id: 'purchases',
     label: 'Compras',
     icon: ShoppingCart,
-    children: [
-      {
-        id: 'new-purchase',
-        label: 'Nueva Compra',
-        icon: ShoppingBag,
-        path: '/purchases/new'
-      },
-      {
-        id: 'purchase-list',
-        label: 'Lista de Compras',
-        icon: FileText,
-        path: '/purchases/list'
-      }
-    ]
+    path: '/purchases'
   },
   {
     id: 'reports',
