@@ -2,6 +2,7 @@ import { useApi, useMutation } from './useApi';
 import { api } from '../services/api';
 import type { 
   Report, 
+  CreateReportRequest,
   UpdateReportRequest, 
   ReportQueryParams, 
   ReportResponse,
@@ -10,19 +11,6 @@ import type {
   ReportStatus,
   ReportFormat
 } from '../types/api';
-
-// Local interface for creating reports
-export interface CreateReportRequest {
-  title: string;
-  description: string;
-  type: ReportType;
-  format: ReportFormat;
-  parameters?: Record<string, any>;
-  filters?: Record<string, any>;
-  startDate?: string;
-  endDate?: string;
-  notes?: string;
-}
 
 // Get all reports
 export const useReports = (params: ReportQueryParams = {}) => {

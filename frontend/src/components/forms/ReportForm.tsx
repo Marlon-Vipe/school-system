@@ -3,10 +3,10 @@ import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@
 import { X, FileText, Calendar, Settings, Save } from 'lucide-react';
 import { 
   ReportType, 
-  ReportFormat
+  ReportFormat,
+  CreateReportRequest
 } from '../../types/api';
 import { 
-  CreateReportRequest,
   getReportTypeLabel, 
   getReportFormatLabel 
 } from '../../hooks/useReports';
