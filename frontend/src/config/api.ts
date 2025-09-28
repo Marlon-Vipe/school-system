@@ -97,6 +97,21 @@ export const API_ENDPOINTS = {
     CANCEL: (id: string) => `/cash/${id}/cancel`,
   },
   
+  // Purchases
+  PURCHASES: {
+    BASE: '/purchases',
+    LIST: '/purchases',
+    CREATE: '/purchases',
+    GET: (id: string) => `/purchases/${id}`,
+    UPDATE: (id: string) => `/purchases/${id}`,
+    DELETE: (id: string) => `/purchases/${id}`,
+    STATS: '/purchases/stats',
+    APPROVE: (id: string) => `/purchases/${id}/approve`,
+    REJECT: (id: string) => `/purchases/${id}/reject`,
+    COMPLETE: (id: string) => `/purchases/${id}/complete`,
+    CANCEL: (id: string) => `/purchases/${id}/cancel`,
+  },
+  
   // Health & Demo
   HEALTH: '/health',
   DEMO: {
@@ -117,6 +132,15 @@ export const API_ENDPOINTS = {
     PAYMENTS_UPDATE: (id: string) => `/demo/payments/${id}`,
     PAYMENTS_DELETE: (id: string) => `/demo/payments/${id}`,
     PAYMENTS_UPDATE_STATUS: (id: string) => `/demo/payments/${id}/status`,
+    PURCHASES: '/demo/purchases',
+    PURCHASES_CREATE: '/demo/purchases',
+    PURCHASES_UPDATE: (id: string) => `/demo/purchases/${id}`,
+    PURCHASES_DELETE: (id: string) => `/demo/purchases/${id}`,
+    PURCHASES_APPROVE: (id: string) => `/demo/purchases/${id}/approve`,
+    PURCHASES_REJECT: (id: string) => `/demo/purchases/${id}/reject`,
+    PURCHASES_COMPLETE: (id: string) => `/demo/purchases/${id}/complete`,
+    PURCHASES_CANCEL: (id: string) => `/demo/purchases/${id}/cancel`,
+    PURCHASES_STATS: '/demo/purchases/stats',
   },
 } as const;
 

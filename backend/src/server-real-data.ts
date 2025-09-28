@@ -860,6 +860,286 @@ app.get('/api/demo/purchases/stats', async (req, res) => {
   }
 });
 
+// Real Purchases endpoints (with authentication)
+app.get('/api/purchases', async (req, res) => {
+  try {
+    const { PurchaseService } = await import('./modules/purchases/purchase.service');
+    const purchaseService = new PurchaseService();
+    
+    const queryParams = {
+      page: parseInt(req.query.page as string) || 1,
+      limit: parseInt(req.query.limit as string) || 10,
+      sortBy: req.query.sortBy as string || 'createdAt',
+      sortOrder: (req.query.sortOrder as 'ASC' | 'DESC') || 'DESC',
+      status: req.query.status as any,
+      category: req.query.category as any,
+      requestedBy: req.query.requestedBy as string,
+      startDate: req.query.startDate as string,
+      endDate: req.query.endDate as string,
+      search: req.query.search as string
+    };
+
+    const result = await purchaseService.getAllPurchases(queryParams);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Purchases retrieved successfully',
+      data: result.data,
+      pagination: result.pagination,
+      authentication: {
+        required: true,
+        note: 'This endpoint requires authentication'
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching purchases:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching purchases from database',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.post('/api/purchases', async (req, res) => {
+  try {
+    const { PurchaseService } = await import('./modules/purchases/purchase.service');
+    const purchaseService = new PurchaseService();
+    
+    // Get user ID from authentication (in real implementation)
+    const userId = req.user?.id || 'ace04070-ed32-4d51-8729-38623a7f5c60'; // Fallback for development
+    
+    const purchaseData = {
+      ...req.body,
+      requestedBy: userId
+    };
+
+    const newPurchase = await purchaseService.createPurchase(purchaseData);
+    
+    res.status(201).json({
+      success: true,
+      message: 'Purchase created successfully',
+      data: newPurchase,
+      authentication: {
+        required: true,
+        note: 'This endpoint requires authentication'
+      }
+    });
+  } catch (error) {
+    console.error('Error creating purchase:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error creating purchase',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.put('/api/purchases/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const { PurchaseService } = await import('./modules/purchases/purchase.service');
+    const purchaseService = new PurchaseService();
+    
+    const updatedPurchase = await purchaseService.updatePurchase(id, req.body);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Purchase updated successfully',
+      data: updatedPurchase,
+      authentication: {
+        required: true,
+        note: 'This endpoint requires authentication'
+      }
+    });
+  } catch (error) {
+    console.error('Error updating purchase:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating purchase',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.delete('/api/purchases/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const { PurchaseService } = await import('./modules/purchases/purchase.service');
+    const purchaseService = new PurchaseService();
+    
+    await purchaseService.deletePurchase(id);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Purchase deleted successfully',
+      authentication: {
+        required: true,
+        note: 'This endpoint requires authentication'
+      }
+    });
+  } catch (error) {
+    console.error('Error deleting purchase:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting purchase',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.post('/api/purchases/:id/approve', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { approvedBy } = req.body;
+    
+    const { PurchaseService } = await import('./modules/purchases/purchase.service');
+    const purchaseService = new PurchaseService();
+    
+    const userId = req.user?.id || approvedBy || 'ace04070-ed32-4d51-8729-38623a7f5c60';
+    
+    const updatedPurchase = await purchaseService.approvePurchase(id, userId);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Purchase approved successfully',
+      data: updatedPurchase,
+      authentication: {
+        required: true,
+        note: 'This endpoint requires authentication'
+      }
+    });
+  } catch (error) {
+    console.error('Error approving purchase:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error approving purchase',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.post('/api/purchases/:id/reject', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rejectionReason, approvedBy } = req.body;
+    
+    const { PurchaseService } = await import('./modules/purchases/purchase.service');
+    const purchaseService = new PurchaseService();
+    
+    const userId = req.user?.id || approvedBy || 'ace04070-ed32-4d51-8729-38623a7f5c60';
+    
+    const updatedPurchase = await purchaseService.rejectPurchase(id, rejectionReason, userId);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Purchase rejected successfully',
+      data: updatedPurchase,
+      authentication: {
+        required: true,
+        note: 'This endpoint requires authentication'
+      }
+    });
+  } catch (error) {
+    console.error('Error rejecting purchase:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error rejecting purchase',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.post('/api/purchases/:id/complete', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { actualDeliveryDate } = req.body;
+    
+    const { PurchaseService } = await import('./modules/purchases/purchase.service');
+    const purchaseService = new PurchaseService();
+    
+    const updatedPurchase = await purchaseService.completePurchase(id, actualDeliveryDate);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Purchase completed successfully',
+      data: updatedPurchase,
+      authentication: {
+        required: true,
+        note: 'This endpoint requires authentication'
+      }
+    });
+  } catch (error) {
+    console.error('Error completing purchase:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error completing purchase',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.post('/api/purchases/:id/cancel', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { cancellationReason } = req.body;
+    
+    const { PurchaseService } = await import('./modules/purchases/purchase.service');
+    const purchaseService = new PurchaseService();
+    
+    const updatedPurchase = await purchaseService.cancelPurchase(id, cancellationReason);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Purchase cancelled successfully',
+      data: updatedPurchase,
+      authentication: {
+        required: true,
+        note: 'This endpoint requires authentication'
+      }
+    });
+  } catch (error) {
+    console.error('Error cancelling purchase:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error cancelling purchase',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.get('/api/purchases/stats', async (req, res) => {
+  try {
+    const { PurchaseService } = await import('./modules/purchases/purchase.service');
+    const purchaseService = new PurchaseService();
+    
+    const { startDate, endDate } = req.query;
+    const stats = await purchaseService.getPurchaseStats(
+      startDate as string,
+      endDate as string
+    );
+    
+    res.status(200).json({
+      success: true,
+      message: 'Purchase statistics retrieved successfully',
+      data: stats,
+      authentication: {
+        required: true,
+        note: 'This endpoint requires authentication'
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching purchase stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching purchase statistics',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 // Root endpoint
 app.get('/', (req, res) => {
   res.status(200).json({

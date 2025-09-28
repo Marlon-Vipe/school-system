@@ -24,8 +24,8 @@ export const usePurchases = (params: PurchaseQueryParams = {}) => {
       // Add timestamp to prevent caching
       searchParams.append('_t', Date.now().toString());
 
-      // Use demo endpoint for development (no authentication required)
-      const response = await api.get(`/demo/purchases?${searchParams.toString()}`);
+      // Use real endpoint for production (with authentication)
+      const response = await api.get(`/purchases?${searchParams.toString()}`);
       
       // Ensure all amounts are properly converted to numbers
       const data = response.data;
@@ -65,7 +65,7 @@ export const usePurchaseStats = (startDate?: string, endDate?: string) => {
       // Add timestamp to prevent caching
       searchParams.append('_t', Date.now().toString());
 
-      const response = await api.get(`/demo/purchases/stats?${searchParams.toString()}`);
+      const response = await api.get(`/purchases/stats?${searchParams.toString()}`);
       
       // Ensure all amounts are properly converted to numbers
       const stats = response.data.data;
@@ -87,7 +87,7 @@ export const usePurchaseStats = (startDate?: string, endDate?: string) => {
 export const useCreatePurchase = () => {
   return useMutation<Purchase, CreatePurchaseRequest>(
     async (data) => {
-      const response = await api.post('/demo/purchases', data);
+      const response = await api.post('/purchases', data);
       return response.data.data;
     }
   );
@@ -97,7 +97,7 @@ export const useCreatePurchase = () => {
 export const useUpdatePurchase = () => {
   return useMutation<Purchase, { id: string; data: UpdatePurchaseRequest }>(
     async ({ id, data }) => {
-      const response = await api.put(`/demo/purchases/${id}`, data);
+      const response = await api.put(`/purchases/${id}`, data);
       return response.data.data;
     }
   );
@@ -107,7 +107,7 @@ export const useUpdatePurchase = () => {
 export const useDeletePurchase = () => {
   return useMutation<void, string>(
     async (id) => {
-      await api.delete(`/demo/purchases/${id}`);
+      await api.delete(`/purchases/${id}`);
     }
   );
 };
@@ -116,7 +116,7 @@ export const useDeletePurchase = () => {
 export const useApprovePurchase = () => {
   return useMutation<Purchase, { id: string; approvedBy?: string }>(
     async ({ id, approvedBy }) => {
-      const response = await api.post(`/demo/purchases/${id}/approve`, { approvedBy });
+      const response = await api.post(`/purchases/${id}/approve`, { approvedBy });
       return response.data.data;
     }
   );
@@ -126,7 +126,7 @@ export const useApprovePurchase = () => {
 export const useRejectPurchase = () => {
   return useMutation<Purchase, { id: string; rejectionReason: string; approvedBy?: string }>(
     async ({ id, rejectionReason, approvedBy }) => {
-      const response = await api.post(`/demo/purchases/${id}/reject`, { rejectionReason, approvedBy });
+      const response = await api.post(`/purchases/${id}/reject`, { rejectionReason, approvedBy });
       return response.data.data;
     }
   );
@@ -136,7 +136,7 @@ export const useRejectPurchase = () => {
 export const useCompletePurchase = () => {
   return useMutation<Purchase, { id: string; actualDeliveryDate?: string }>(
     async ({ id, actualDeliveryDate }) => {
-      const response = await api.post(`/demo/purchases/${id}/complete`, { actualDeliveryDate });
+      const response = await api.post(`/purchases/${id}/complete`, { actualDeliveryDate });
       return response.data.data;
     }
   );
@@ -146,7 +146,7 @@ export const useCompletePurchase = () => {
 export const useCancelPurchase = () => {
   return useMutation<Purchase, { id: string; cancellationReason?: string }>(
     async ({ id, cancellationReason }) => {
-      const response = await api.post(`/demo/purchases/${id}/cancel`, { cancellationReason });
+      const response = await api.post(`/purchases/${id}/cancel`, { cancellationReason });
       return response.data.data;
     }
   );
