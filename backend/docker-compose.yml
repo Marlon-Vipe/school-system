@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: vipe-school-db
+    environment:
+      POSTGRES_DB: vipe_school_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - vipe-school-network
+    restart: unless-stopped
+
+  # API Application
+  api:
+    build: .
+    container_name: vipe-school-api
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: password
+      DB_NAME: vipe_school_db
+      JWT_SECRET: your-super-secret-jwt-key-here
+      JWT_EXPIRES_IN: 24h
+      CORS_ORIGIN: http://localhost:3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    networks:
+      - vipe-school-network
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+
+  # Redis (for future caching/sessions)
+  redis:
+    image: redis:7-alpine
+    container_name: vipe-school-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - vipe-school-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  vipe-school-network:
+    driver: bridge
+
+
+
