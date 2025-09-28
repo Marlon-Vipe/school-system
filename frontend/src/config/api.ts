@@ -112,6 +112,19 @@ export const API_ENDPOINTS = {
     CANCEL: (id: string) => `/purchases/${id}/cancel`,
   },
   
+  // Reports
+  REPORTS: {
+    BASE: '/reports',
+    LIST: '/reports',
+    CREATE: '/reports',
+    GET: (id: string) => `/reports/${id}`,
+    UPDATE: (id: string) => `/reports/${id}`,
+    DELETE: (id: string) => `/reports/${id}`,
+    STATS: '/reports/stats',
+    GENERATE: (id: string) => `/reports/${id}/generate`,
+    DOWNLOAD: (id: string) => `/reports/${id}/download`,
+  },
+  
   // Health & Demo
   HEALTH: '/health',
   DEMO: {

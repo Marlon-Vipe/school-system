@@ -7,6 +7,7 @@ import { Enrollment } from '../modules/enrollments/enrollment.entity';
 import { Payment } from '../modules/payments/payment.entity';
 import { CashEntry } from '../modules/cash/cash-entry.entity';
 import { Purchase } from '../modules/purchases/purchase.entity';
+import { Report } from '../modules/reports/report.entity';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -17,15 +18,16 @@ export const AppDataSource = new DataSource({
   database: config.database.database,
   synchronize: config.nodeEnv === 'development',
   logging: config.nodeEnv === 'development',
-  entities: [
-    Student,
-    User,
-    Course,
-    Enrollment,
-    Payment,
-    CashEntry,
-    Purchase,
-  ],
+        entities: [
+          Student,
+          User,
+          Course,
+          Enrollment,
+          Payment,
+          CashEntry,
+          Purchase,
+          Report,
+        ],
   migrations: ['src/migrations/**/*.ts'],
   subscribers: ['src/subscribers/**/*.ts'],
   // Configuración adicional para mejorar la conexión

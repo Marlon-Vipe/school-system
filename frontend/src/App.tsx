@@ -10,6 +10,7 @@ import PaymentsPage from './pages/PaymentsPage'
 import CashPage from './pages/CashPage'
 import PurchasesPage from './pages/PurchasesPage'
 import ReportsPage from './pages/ReportsPage'
+import ReportsPage from './pages/ReportsPage'
 
 function App() {
   // Para desarrollo, mostrar la aplicación directamente sin autenticación

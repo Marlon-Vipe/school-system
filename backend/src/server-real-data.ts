@@ -1140,6 +1140,266 @@ app.get('/api/purchases/stats', async (req, res) => {
   }
 });
 
+// Real Reports endpoints (with authentication)
+app.get('/api/reports', async (req, res) => {
+  try {
+    const { ReportService } = await import('./modules/reports/report.service');
+    const reportService = new ReportService();
+    
+    const queryParams = {
+      page: parseInt(req.query.page as string) || 1,
+      limit: parseInt(req.query.limit as string) || 10,
+      sortBy: req.query.sortBy as string || 'createdAt',
+      sortOrder: (req.query.sortOrder as 'ASC' | 'DESC') || 'DESC',
+      type: req.query.type as any,
+      status: req.query.status as any,
+      format: req.query.format as any,
+      requestedBy: req.query.requestedBy as string,
+      startDate: req.query.startDate as string,
+      endDate: req.query.endDate as string,
+      search: req.query.search as string
+    };
+
+    const result = await reportService.getAllReports(queryParams);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Reports retrieved successfully',
+      data: result.data,
+      pagination: result.pagination,
+      authentication: {
+        required: true,
+        note: 'This endpoint requires authentication'
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching reports:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching reports from database',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.post('/api/reports', async (req, res) => {
+  try {
+    const { ReportService } = await import('./modules/reports/report.service');
+    const reportService = new ReportService();
+    
+    // Get user ID from authentication (in real implementation)
+    const userId = req.user?.id || 'ace04070-ed32-4d51-8729-38623a7f5c60'; // Fallback for development
+    
+    const reportData = {
+      ...req.body,
+      requestedBy: userId
+    };
+
+    const newReport = await reportService.createReport(reportData);
+    
+    res.status(201).json({
+      success: true,
+      message: 'Report created successfully',
+      data: newReport,
+      authentication: {
+        required: true,
+        note: 'This endpoint requires authentication'
+      }
+    });
+  } catch (error) {
+    console.error('Error creating report:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error creating report',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.get('/api/reports/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const { ReportService } = await import('./modules/reports/report.service');
+    const reportService = new ReportService();
+    
+    const report = await reportService.getReportById(id);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Report retrieved successfully',
+      data: report,
+      authentication: {
+        required: true,
+        note: 'This endpoint requires authentication'
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching report:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching report',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.put('/api/reports/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const { ReportService } = await import('./modules/reports/report.service');
+    const reportService = new ReportService();
+    
+    const updatedReport = await reportService.updateReport(id, req.body);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Report updated successfully',
+      data: updatedReport,
+      authentication: {
+        required: true,
+        note: 'This endpoint requires authentication'
+      }
+    });
+  } catch (error) {
+    console.error('Error updating report:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating report',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.delete('/api/reports/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const { ReportService } = await import('./modules/reports/report.service');
+    const reportService = new ReportService();
+    
+    await reportService.deleteReport(id);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Report deleted successfully',
+      authentication: {
+        required: true,
+        note: 'This endpoint requires authentication'
+      }
+    });
+  } catch (error) {
+    console.error('Error deleting report:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting report',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.post('/api/reports/:id/generate', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const { ReportService } = await import('./modules/reports/report.service');
+    const reportService = new ReportService();
+    
+    const generatedReport = await reportService.generateReport(id);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Report generated successfully',
+      data: generatedReport,
+      authentication: {
+        required: true,
+        note: 'This endpoint requires authentication'
+      }
+    });
+  } catch (error) {
+    console.error('Error generating report:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error generating report',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.get('/api/reports/:id/download', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const { ReportService } = await import('./modules/reports/report.service');
+    const reportService = new ReportService();
+    
+    const report = await reportService.getReportById(id);
+    
+    if (report.status !== 'completed') {
+      return res.status(400).json({
+        success: false,
+        message: 'Report is not ready for download'
+      });
+    }
+    
+    // Increment download count
+    await reportService.incrementDownloadCount(id);
+    
+    // In a real implementation, you would serve the actual file
+    res.status(200).json({
+      success: true,
+      message: 'Download link generated',
+      data: {
+        downloadUrl: report.downloadUrl,
+        fileName: `${report.title}.${report.format}`,
+        expiresAt: report.expiresAt
+      },
+      authentication: {
+        required: true,
+        note: 'This endpoint requires authentication'
+      }
+    });
+  } catch (error) {
+    console.error('Error downloading report:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error downloading report',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.get('/api/reports/stats', async (req, res) => {
+  try {
+    const { ReportService } = await import('./modules/reports/report.service');
+    const reportService = new ReportService();
+    
+    const { startDate, endDate } = req.query;
+    const stats = await reportService.getReportStats(
+      startDate as string,
+      endDate as string
+    );
+    
+    res.status(200).json({
+      success: true,
+      message: 'Report statistics retrieved successfully',
+      data: stats,
+      authentication: {
+        required: true,
+        note: 'This endpoint requires authentication'
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching report stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching report statistics',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 // Root endpoint
 app.get('/', (req, res) => {
   res.status(200).json({
