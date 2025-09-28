@@ -7,7 +7,7 @@ import {
   getReportTypeLabel, 
   getReportFormatLabel,
   CreateReportRequest 
-} from '../types/api';
+} from '../../types/api';
 
 interface ReportFormProps {
   isOpen: boolean;
