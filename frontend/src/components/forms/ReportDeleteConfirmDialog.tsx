@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { AlertTriangle, Trash2, X } from 'lucide-react';
-import { Report, getReportTypeLabel, getReportStatusLabel, formatDate } from '../../types/api';
+import { Report } from '../../types/api';
+import { getReportTypeLabel, getReportStatusLabel, formatDate } from '../../hooks/useReports';
 
 interface ReportDeleteConfirmDialogProps {
   isOpen: boolean;

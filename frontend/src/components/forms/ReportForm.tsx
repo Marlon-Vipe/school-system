@@ -4,10 +4,12 @@ import { X, FileText, Calendar, Settings, Save } from 'lucide-react';
 import { 
   ReportType, 
   ReportFormat, 
-  getReportTypeLabel, 
-  getReportFormatLabel,
   CreateReportRequest 
 } from '../../types/api';
+import { 
+  getReportTypeLabel, 
+  getReportFormatLabel 
+} from '../../hooks/useReports';
 
 interface ReportFormProps {
   isOpen: boolean;

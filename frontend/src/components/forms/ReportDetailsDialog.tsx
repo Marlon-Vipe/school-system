@@ -1,8 +1,8 @@
 import React from 'react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { X, FileText, Calendar, Download, User, Clock, CheckCircle, XCircle, AlertCircle, Play } from 'lucide-react';
+import { Report } from '../../types/api';
 import { 
-  Report, 
   getReportTypeLabel, 
   getReportStatusLabel, 
   getReportFormatLabel,
@@ -12,7 +12,7 @@ import {
   canDownloadReport,
   canGenerateReport,
   isReportExpired
-} from '../../types/api';
+} from '../../hooks/useReports';
 
 interface ReportDetailsDialogProps {
   isOpen: boolean;
