@@ -13,7 +13,7 @@ import ReportsPage from './pages/ReportsPage'
 function App() {
   // Para desarrollo, mostrar la aplicación directamente sin autenticación
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
       <Sidebar />
       
@@ -23,7 +23,7 @@ function App() {
         <Header />
         
         {/* Page Content */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-gray-900">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto">
           <PageWrapper>
             <Routes>
               <Route path="/" element={<DashboardPage />} />
