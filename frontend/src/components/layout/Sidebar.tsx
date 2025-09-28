@@ -209,12 +209,12 @@ const Sidebar = () => {
   }
 
   return (
-    <div className="w-64 bg-white shadow-lg border-r border-gray-200 flex flex-col">
+    <div className="w-64 bg-white dark:bg-gray-900 shadow-lg border-r border-gray-200 dark:border-gray-700 flex flex-col">
       {/* Logo/Brand */}
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center">
-          <Home className="w-8 h-8 text-primary-600" />
-          <h1 className="ml-2 text-xl font-bold text-gray-900">
+          <Home className="w-8 h-8 text-primary-600 dark:text-primary-400" />
+          <h1 className="ml-2 text-xl font-bold text-gray-900 dark:text-gray-100">
             Vipe School
           </h1>
         </div>
@@ -226,8 +226,8 @@ const Sidebar = () => {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-200">
-        <div className="text-xs text-gray-500 text-center">
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
           Sistema de Gestión Educativa
         </div>
       </div>

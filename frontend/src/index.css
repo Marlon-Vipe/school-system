@@ -2,20 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --color-primary: 59 130 246;
+    --color-primary-dark: 37 99 235;
+  }
+  
+  .dark {
+    --color-primary: 96 165 250;
+    --color-primary-dark: 59 130 246;
+  }
+}
+
 @layer components {
   .sidebar-item {
     @apply flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200;
   }
   
   .sidebar-item:hover {
-    @apply bg-gray-100 text-gray-900;
+    @apply bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-gray-100;
   }
   
   .sidebar-item.active {
-    @apply bg-blue-100 text-blue-700;
+    @apply bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200;
   }
   
   .sidebar-submenu {
     @apply ml-6 space-y-1;
+  }
+
+  /* Dark mode specific styles */
+  .dark-mode-card {
+    @apply bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700;
+  }
+  
+  .dark-mode-text {
+    @apply text-gray-900 dark:text-gray-100;
+  }
+  
+  .dark-mode-text-secondary {
+    @apply text-gray-600 dark:text-gray-400;
+  }
+  
+  .dark-mode-input {
+    @apply bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100;
+  }
+  
+  .dark-mode-button {
+    @apply bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600;
   }
 }

@@ -6,7 +6,7 @@ interface PageWrapperProps {
 
 const PageWrapper = ({ children }: PageWrapperProps) => {
   return (
-    <div className="p-6">
+    <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-full">
       <div className="max-w-7xl mx-auto">
         {children}
       </div>
