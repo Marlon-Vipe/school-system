@@ -6,6 +6,7 @@ import { Course } from '../modules/courses/course.entity';
 import { Enrollment } from '../modules/enrollments/enrollment.entity';
 import { Payment } from '../modules/payments/payment.entity';
 import { CashEntry } from '../modules/cash/cash-entry.entity';
+import { Purchase } from '../modules/purchases/purchase.entity';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -23,6 +24,7 @@ export const AppDataSource = new DataSource({
     Enrollment,
     Payment,
     CashEntry,
+    Purchase,
   ],
   migrations: ['src/migrations/**/*.ts'],
   subscribers: ['src/subscribers/**/*.ts'],
