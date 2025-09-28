@@ -1,4 +1,4 @@
-import { PurchaseRepository, PurchaseQueryParams, PurchaseStats } from './purchase.repository';
+import { Repository, DataSource } from 'typeorm';
 import { Purchase, PurchaseStatus, PurchaseCategory, PaymentMethod } from './purchase.entity';
 import { AppError } from '../../utils/appError';
 
@@ -33,19 +33,119 @@ export interface UpdatePurchaseRequest {
   attachments?: string;
 }
 
+export interface PurchaseQueryParams {
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'ASC' | 'DESC';
+  status?: PurchaseStatus;
+  category?: PurchaseCategory;
+  requestedBy?: string;
+  startDate?: string;
+  endDate?: string;
+  search?: string;
+}
+
+export interface PurchaseStats {
+  totalPurchases: number;
+  totalAmount: number;
+  pendingPurchases: number;
+  approvedPurchases: number;
+  completedPurchases: number;
+  rejectedPurchases: number;
+  averageAmount: number;
+}
+
+export interface PurchaseResponse {
+  data: Purchase[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
 export class PurchaseService {
-  private purchaseRepository: PurchaseRepository;
+  private repository: Repository<Purchase>;
 
   constructor() {
-    this.purchaseRepository = new PurchaseRepository();
+    // Get repository from AppDataSource
+    const { AppDataSource } = require('../../config/database');
+    this.repository = AppDataSource.getRepository(Purchase);
   }
 
-  async getAllPurchases(params: PurchaseQueryParams = {}) {
-    return await this.purchaseRepository.findAll(params);
+  async getAllPurchases(params: PurchaseQueryParams = {}): Promise<PurchaseResponse> {
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = 'createdAt',
+      sortOrder = 'DESC',
+      status,
+      category,
+      requestedBy,
+      startDate,
+      endDate,
+      search
+    } = params;
+
+    const queryBuilder = this.repository.createQueryBuilder('purchase')
+      .leftJoinAndSelect('purchase.requester', 'requester')
+      .leftJoinAndSelect('purchase.approver', 'approver');
+
+    // Apply filters
+    if (status) {
+      queryBuilder.andWhere('purchase.status = :status', { status });
+    }
+
+    if (category) {
+      queryBuilder.andWhere('purchase.category = :category', { category });
+    }
+
+    if (requestedBy) {
+      queryBuilder.andWhere('purchase.requestedBy = :requestedBy', { requestedBy });
+    }
+
+    if (startDate) {
+      queryBuilder.andWhere('purchase.purchaseDate >= :startDate', { startDate });
+    }
+
+    if (endDate) {
+      queryBuilder.andWhere('purchase.purchaseDate <= :endDate', { endDate });
+    }
+
+    if (search) {
+      queryBuilder.andWhere(
+        '(purchase.title ILIKE :search OR purchase.description ILIKE :search OR purchase.supplier ILIKE :search)',
+        { search: `%${search}%` }
+      );
+    }
+
+    // Apply sorting
+    queryBuilder.orderBy(`purchase.${sortBy}`, sortOrder);
+
+    // Apply pagination
+    const offset = (page - 1) * limit;
+    queryBuilder.skip(offset).take(limit);
+
+    const [data, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    };
   }
 
   async getPurchaseById(id: string): Promise<Purchase> {
-    const purchase = await this.purchaseRepository.findById(id);
+    const purchase = await this.repository.findOne({
+      where: { id },
+      relations: ['requester', 'approver']
+    });
     if (!purchase) {
       throw new AppError('Compra no encontrada', 404);
     }
@@ -84,11 +184,12 @@ export class PurchaseService {
       status: PurchaseStatus.PENDING
     };
 
-    return await this.purchaseRepository.create(purchaseData);
+    const purchase = this.repository.create(purchaseData);
+    return await this.repository.save(purchase);
   }
 
   async updatePurchase(id: string, data: UpdatePurchaseRequest): Promise<Purchase> {
-    const existingPurchase = await this.purchaseRepository.findById(id);
+    const existingPurchase = await this.repository.findOne({ where: { id } });
     if (!existingPurchase) {
       throw new AppError('Compra no encontrada', 404);
     }
@@ -123,7 +224,12 @@ export class PurchaseService {
       (data as any).actualDeliveryDate = actualDate;
     }
 
-    const updatedPurchase = await this.purchaseRepository.update(id, data);
+    await this.repository.update(id, data);
+    const updatedPurchase = await this.repository.findOne({
+      where: { id },
+      relations: ['requester', 'approver']
+    });
+    
     if (!updatedPurchase) {
       throw new AppError('Error al actualizar la compra', 500);
     }
@@ -131,23 +237,51 @@ export class PurchaseService {
   }
 
   async deletePurchase(id: string): Promise<void> {
-    const purchase = await this.purchaseRepository.findById(id);
+    const purchase = await this.repository.findOne({ where: { id } });
     if (!purchase) {
       throw new AppError('Compra no encontrada', 404);
     }
 
-    const deleted = await this.purchaseRepository.delete(id);
-    if (!deleted) {
+    const result = await this.repository.delete(id);
+    if (result.affected === 0) {
       throw new AppError('Error al eliminar la compra', 500);
     }
   }
 
   async getPurchaseStats(startDate?: string, endDate?: string): Promise<PurchaseStats> {
-    return await this.purchaseRepository.getStats(startDate, endDate);
+    const queryBuilder = this.repository.createQueryBuilder('purchase');
+
+    if (startDate) {
+      queryBuilder.andWhere('purchase.purchaseDate >= :startDate', { startDate });
+    }
+
+    if (endDate) {
+      queryBuilder.andWhere('purchase.purchaseDate <= :endDate', { endDate });
+    }
+
+    const purchases = await queryBuilder.getMany();
+
+    const totalPurchases = purchases.length;
+    const totalAmount = purchases.reduce((sum, purchase) => sum + Number(purchase.amount), 0);
+    const pendingPurchases = purchases.filter(p => p.status === PurchaseStatus.PENDING).length;
+    const approvedPurchases = purchases.filter(p => p.status === PurchaseStatus.APPROVED).length;
+    const completedPurchases = purchases.filter(p => p.status === PurchaseStatus.COMPLETED).length;
+    const rejectedPurchases = purchases.filter(p => p.status === PurchaseStatus.REJECTED).length;
+    const averageAmount = totalPurchases > 0 ? totalAmount / totalPurchases : 0;
+
+    return {
+      totalPurchases,
+      totalAmount,
+      pendingPurchases,
+      approvedPurchases,
+      completedPurchases,
+      rejectedPurchases,
+      averageAmount
+    };
   }
 
   async approvePurchase(id: string, approvedBy: string): Promise<Purchase> {
-    const purchase = await this.purchaseRepository.findById(id);
+    const purchase = await this.repository.findOne({ where: { id } });
     if (!purchase) {
       throw new AppError('Compra no encontrada', 404);
     }
@@ -156,14 +290,21 @@ export class PurchaseService {
       throw new AppError('Solo se pueden aprobar compras pendientes', 400);
     }
 
-    return await this.purchaseRepository.update(id, {
+    await this.repository.update(id, {
       status: PurchaseStatus.APPROVED,
       approvedBy
-    }) as Purchase;
+    });
+
+    const updatedPurchase = await this.repository.findOne({
+      where: { id },
+      relations: ['requester', 'approver']
+    });
+
+    return updatedPurchase as Purchase;
   }
 
   async rejectPurchase(id: string, rejectionReason: string, approvedBy: string): Promise<Purchase> {
-    const purchase = await this.purchaseRepository.findById(id);
+    const purchase = await this.repository.findOne({ where: { id } });
     if (!purchase) {
       throw new AppError('Compra no encontrada', 404);
     }
@@ -176,15 +317,22 @@ export class PurchaseService {
       throw new AppError('Debe proporcionar una razón para el rechazo', 400);
     }
 
-    return await this.purchaseRepository.update(id, {
+    await this.repository.update(id, {
       status: PurchaseStatus.REJECTED,
       rejectionReason,
       approvedBy
-    }) as Purchase;
+    });
+
+    const updatedPurchase = await this.repository.findOne({
+      where: { id },
+      relations: ['requester', 'approver']
+    });
+
+    return updatedPurchase as Purchase;
   }
 
   async completePurchase(id: string, actualDeliveryDate?: string): Promise<Purchase> {
-    const purchase = await this.purchaseRepository.findById(id);
+    const purchase = await this.repository.findOne({ where: { id } });
     if (!purchase) {
       throw new AppError('Compra no encontrada', 404);
     }
@@ -205,11 +353,18 @@ export class PurchaseService {
       updateData.actualDeliveryDate = deliveryDate;
     }
 
-    return await this.purchaseRepository.update(id, updateData) as Purchase;
+    await this.repository.update(id, updateData);
+
+    const updatedPurchase = await this.repository.findOne({
+      where: { id },
+      relations: ['requester', 'approver']
+    });
+
+    return updatedPurchase as Purchase;
   }
 
   async cancelPurchase(id: string, cancellationReason?: string): Promise<Purchase> {
-    const purchase = await this.purchaseRepository.findById(id);
+    const purchase = await this.repository.findOne({ where: { id } });
     if (!purchase) {
       throw new AppError('Compra no encontrada', 404);
     }
@@ -226,14 +381,29 @@ export class PurchaseService {
       updateData.rejectionReason = cancellationReason;
     }
 
-    return await this.purchaseRepository.update(id, updateData) as Purchase;
+    await this.repository.update(id, updateData);
+
+    const updatedPurchase = await this.repository.findOne({
+      where: { id },
+      relations: ['requester', 'approver']
+    });
+
+    return updatedPurchase as Purchase;
   }
 
   async getPurchasesByStatus(status: PurchaseStatus): Promise<Purchase[]> {
-    return await this.purchaseRepository.findByStatus(status);
+    return await this.repository.find({
+      where: { status },
+      relations: ['requester', 'approver'],
+      order: { createdAt: 'DESC' }
+    });
   }
 
   async getPurchasesByRequester(requestedBy: string): Promise<Purchase[]> {
-    return await this.purchaseRepository.findByRequester(requestedBy);
+    return await this.repository.find({
+      where: { requestedBy },
+      relations: ['requester', 'approver'],
+      order: { createdAt: 'DESC' }
+    });
   }
 }
