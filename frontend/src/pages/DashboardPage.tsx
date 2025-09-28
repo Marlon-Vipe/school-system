@@ -13,10 +13,11 @@ const DashboardPage = () => {
   const { stats, loading, error } = useDashboard()
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-CO', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(amount)
   }
 
