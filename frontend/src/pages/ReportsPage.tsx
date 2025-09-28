@@ -31,12 +31,15 @@ import {
   canDownloadReport,
   canGenerateReport,
   canDeleteReport,
-  ReportType,
-  ReportStatus,
-  ReportFormat,
   ReportQueryParams
 } from '../hooks/useReports';
-import type { Report, ReportFilters } from '../types/api';
+import type { 
+  Report, 
+  ReportFilters, 
+  ReportType,
+  ReportStatus,
+  ReportFormat
+} from '../types/api';
 import ReportForm from '../components/forms/ReportForm';
 import ReportDetailsDialog from '../components/forms/ReportDetailsDialog';
 import ReportDeleteConfirmDialog from '../components/forms/ReportDeleteConfirmDialog';
