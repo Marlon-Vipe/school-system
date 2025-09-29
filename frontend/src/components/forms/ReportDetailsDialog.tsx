@@ -1,7 +1,7 @@
 import React from 'react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { X, FileText, Calendar, Download, User, Clock, CheckCircle, XCircle, AlertCircle, Play } from 'lucide-react';
-import { Report } from '../../types/api';
+import { Report } from '../../types/reports';
 import { 
   getReportTypeLabel, 
   getReportStatusLabel, 

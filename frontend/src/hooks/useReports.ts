@@ -10,7 +10,7 @@ import type {
   ReportType,
   ReportStatus,
   ReportFormat
-} from '../types/api';
+} from '../types/reports';
 
 // Get all reports
 export const useReports = (params: ReportQueryParams = {}) => {

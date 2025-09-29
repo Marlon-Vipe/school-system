@@ -39,7 +39,7 @@ import type {
   ReportType,
   ReportStatus,
   ReportFormat
-} from '../types/api';
+} from '../types/reports';
 import ReportForm from '../components/forms/ReportForm';
 import ReportDetailsDialog from '../components/forms/ReportDetailsDialog';
 import ReportDeleteConfirmDialog from '../components/forms/ReportDeleteConfirmDialog';

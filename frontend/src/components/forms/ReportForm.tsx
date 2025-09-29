@@ -5,7 +5,7 @@ import {
   ReportType, 
   ReportFormat,
   CreateReportRequest
-} from '../../types/api';
+} from '../../types/reports';
 import { 
   getReportTypeLabel, 
   getReportFormatLabel 
